@@ -3,7 +3,22 @@
 <title>Benchmark Test</title>
 </head>
 <body>
+<!-- <img src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif" id="loading" style="visibility: hidden;" /><br> -->
+<p style="width: 500px; height: 300px; visibility: hidden;" id="loading">benchmarking...</p>
+<h2>FLOPS</h2>
+<p>
+  <button id="button-start-flops-js">JavaScript</button>
+  <button id="button-start-flops-gpu">GPU</button>
+  <button id="button-start-flops-wasm">WebAssembly</button>
+</p>
+<h2>Dot Product</h2>
+<p>
+  <button id="button-start-dot-product-js">JavaScript</button>
+  <button id="button-start-dot-product-gpu">GPU</button>
+  <button id="button-start-dot-product-wasm">WebAssembly</button>
+</p>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>
+<!-- <script src="//cdn.jsdelivr.net/npm/gpu.js@latest/dist/gpu-browser.min.js"></script> -->
 <script src="./index.js"></script>
 </body>
 </html>
