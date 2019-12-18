@@ -1,0 +1,19 @@
+{
+  "name": "js-wasm-gpu-benchmark",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/niba1122/js-wasm-gpu-benchmark.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/niba1122/js-wasm-gpu-benchmark/issues"
+  },
+  "homepage": "https://github.com/niba1122/js-wasm-gpu-benchmark#readme"
+}
