@@ -4,13 +4,11 @@ extern crate web_sys;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
-pub fn run() -> Result {
-    let result = benchmark(10000, |_| {
-        let hoge = 1;
-        let fuga = 2;
-        hoge + fuga;
+pub fn run(dim: usize, sample_a: &[f32], sample_b: &[f32], debug_result: &mut [f32]) -> Result {
+    let result = benchmark(10, |_| {
+        dot_product(dim, debug_result, sample_a, sample_b);
     });
-    // result.average
+
     Result {
         average: result.average
     }
@@ -34,7 +32,7 @@ struct BenchmarkResult {
     average: f64
 }
 
-fn benchmark<F>(count: i32, process: F) -> BenchmarkResult where F: Fn(i32) {
+fn benchmark<F>(count: i32, mut process: F) -> BenchmarkResult where F: FnMut(i32) {
     let performance_timer = web_sys::window()
         .expect("should have a Window")
         .performance()
@@ -47,5 +45,15 @@ fn benchmark<F>(count: i32, process: F) -> BenchmarkResult where F: Fn(i32) {
     let end_time = performance_timer.now();
     return BenchmarkResult {
         average: (end_time - start_time) / count as f64
+    }
+}
+
+fn dot_product(dim: usize, c: &mut [f32], a: &[f32], b: &[f32]) {
+    for k in 0..dim {
+        for i in 0..dim {
+            for j in 0..dim {
+                c[i * dim + j] += a[i * dim + k] * b[k * dim + j];
+            }
+        }
     }
 }

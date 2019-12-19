@@ -195,10 +195,7 @@ buttonStartFLOPSGPUDOM.addEventListener('click', () => {
 
 buttonStartFLOPSWebAssemblyDOM.addEventListener('click', () => {
   startBenchmarkIfNeeded(() => {
-    const result = wasmBench?.run();
-    if (!result) return
-    console.log(result.average)
-    result.free()
+    // const result = wasmBench?.run();
   })
 })
 
@@ -216,7 +213,14 @@ buttonStartDotProductGPUDOM.addEventListener('click', () => {
 
 buttonStartDotProductWebAssemblyDOM.addEventListener('click', () => {
   startBenchmarkIfNeeded(() => {
-    wasmBench?.run()
+    const abSampleA = new Float32Array((DOT_PRODUCT_SAMPLE_A as any).flat())
+    const abSampleB = new Float32Array((DOT_PRODUCT_SAMPLE_B as any).flat())
+    const debugResult = new Float32Array((DOT_PRODUCT_SAMPLE_A as any).flat())
+    const result = wasmBench?.run(DOT_PRODUCT_N_DIM, abSampleA, abSampleB, debugResult)
+    if (!result) return
+    console.log('ave: ', result.average)
+    console.log('debug: ', debugResult)
+    result.free()
   })
 })
 
