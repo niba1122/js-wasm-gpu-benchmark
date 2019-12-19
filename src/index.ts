@@ -195,7 +195,10 @@ buttonStartFLOPSGPUDOM.addEventListener('click', () => {
 
 buttonStartFLOPSWebAssemblyDOM.addEventListener('click', () => {
   startBenchmarkIfNeeded(() => {
-    console.log(wasmBench?.greeting())
+    const result = wasmBench?.run();
+    if (!result) return
+    console.log(result.average)
+    result.free()
   })
 })
 
@@ -213,7 +216,7 @@ buttonStartDotProductGPUDOM.addEventListener('click', () => {
 
 buttonStartDotProductWebAssemblyDOM.addEventListener('click', () => {
   startBenchmarkIfNeeded(() => {
-    wasmBench?.greeting()
+    wasmBench?.run()
   })
 })
 
