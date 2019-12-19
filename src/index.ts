@@ -1,5 +1,13 @@
 import * as tf from '@tensorflow/tfjs'
 
+let wasmBench: typeof import('wasm-bench') | undefined;
+
+async function loadWasmBench() {
+  wasmBench = await import('wasm-bench')
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 async function benchmark(
   n: number,
   block: ((i: number) => void) | ((i: number) => Promise<void>),
@@ -80,8 +88,6 @@ const FLOPS_COUNT = 10
 const DOT_PRODUCT_N_DIM = 1000;
 const [DOT_PRODUCT_SAMPLE_A, DOT_PRODUCT_SAMPLE_B] = generateDotProductSamples(DOT_PRODUCT_N_DIM)
 const DOT_PRODUCT_COUNT = 10
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 async function benchmarkFLOPSJavaScript(): Promise<void> {
   const { total } = await benchmark(FLOPS_COUNT, () => {
@@ -187,6 +193,12 @@ buttonStartFLOPSGPUDOM.addEventListener('click', () => {
   })
 })
 
+buttonStartFLOPSWebAssemblyDOM.addEventListener('click', () => {
+  startBenchmarkIfNeeded(() => {
+    wasmBench?.greeting()
+  })
+})
+
 buttonStartDotProductJavaScriptDOM.addEventListener('click', () => {
   startBenchmarkIfNeeded(() => {
     benchmarkDotProductJavaScript()
@@ -198,3 +210,11 @@ buttonStartDotProductGPUDOM.addEventListener('click', () => {
     benchmarkDotProductGPU()
   })
 })
+
+buttonStartDotProductWebAssemblyDOM.addEventListener('click', () => {
+  startBenchmarkIfNeeded(() => {
+    wasmBench?.greeting()
+  })
+})
+
+loadWasmBench();

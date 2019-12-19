@@ -26,6 +26,7 @@
     "webpack-dev-server": "^3.9.0"
   },
   "dependencies": {
-    "@tensorflow/tfjs": "^1.4.0"
+    "@tensorflow/tfjs": "^1.4.0",
+    "wasm-bench": "file:lib/wasm-bench/pkg"
   }
 }
