@@ -1,9 +1,16 @@
 extern crate wasm_bindgen;
+extern crate web_sys;
+
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub fn greeting() -> String {
-    "hello".to_string()
+    let now = web_sys::window()
+        .expect("should have a Window")
+        .performance()
+        .expect("should have a Performance")
+        .now();
+    now.to_string()
 }
 
 #[cfg(test)]

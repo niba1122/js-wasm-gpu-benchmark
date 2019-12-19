@@ -195,7 +195,7 @@ buttonStartFLOPSGPUDOM.addEventListener('click', () => {
 
 buttonStartFLOPSWebAssemblyDOM.addEventListener('click', () => {
   startBenchmarkIfNeeded(() => {
-    wasmBench?.greeting()
+    console.log(wasmBench?.greeting())
   })
 })
 
