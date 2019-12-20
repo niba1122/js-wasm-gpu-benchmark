@@ -6,7 +6,7 @@
     "strictNullChecks": true,
     "moduleResolution": "node",
     "noEmit": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
   }
 }
 

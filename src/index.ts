@@ -1,6 +1,8 @@
 import * as tf from '@tensorflow/tfjs'
 import benchmark from './benchmark';
 import dotProductJS from './dot-product';
+// import { GPU } from 'gpu.js';
+const { GPU } = require('gpu.js');
 
 let wasmBench: typeof import('wasm-bench') | undefined;
 
@@ -55,15 +57,15 @@ async function benchmarkFLOPSJavaScript(): Promise<void> {
 }
 
 async function benchmarkFLOPSGPU() {
-  const { average } = await benchmark(FLOPS_COUNT, async (_, value) => {
-    const res = await value.data()
-    console.log('flops js result: ', res)
-  }, () => {
-    let result = tf.addN(Array.from(FLOPS_SAMPLES))
-    return result
-  })
+  // const { average } = await benchmark(FLOPS_COUNT, async (_, value) => {
+  //   const res = await value.data()
+  //   console.log('flops js result: ', res)
+  // }, () => {
+  //   let result = tf.addN(Array.from(FLOPS_SAMPLES))
+  //   return result
+  // })
 
-  console.log('flops gpu: ', average)
+  // console.log('flops gpu: ', average)
 }
 
 async function benchmarkDotProductJavaScript() {
@@ -78,16 +80,33 @@ async function benchmarkDotProductJavaScript() {
 }
 
 async function benchmarkDotProductGPU() {
-  const tfSampleA = tf.tensor2d(DOT_PRODUCT_SAMPLE_A);
-  const tfSampleB = tf.tensor2d(DOT_PRODUCT_SAMPLE_B);
+  // const tfSampleA = tf.tensor2d(DOT_PRODUCT_SAMPLE_A);
+  // const tfSampleB = tf.tensor2d(DOT_PRODUCT_SAMPLE_B);
 
-  const { average: tfTotal } = await benchmark(DOT_PRODUCT_COUNT, async (_, value) => {
-    await value.data()
-  }, () => {
-    return tf.dot(tfSampleA, tfSampleB)
-  })
+  // const { average: tfTotal } = await benchmark(DOT_PRODUCT_COUNT, async (_, value) => {
+  //   await value.data()
+  // }, () => {
+  //   return tf.dot(tfSampleA, tfSampleB)
+  // })
 
-  console.log('tf: ', tfTotal)
+  // console.log('tf: ', tfTotal)
+  console.log('gpu: ', GPU)
+  const gpu = new GPU();
+  // const multiplyMatrix = gpu.createKernel(function (a: any, b: any) {
+  //   let sum = 0;
+  //   for (let i = 0; i < this.constants.size; i++) {
+  //     sum += a[this.thread.y][i] * b[i][this.thread.x];
+  //   }
+  //   return sum;
+  // }, {
+  //   output: [DOT_PRODUCT_N_DIM, DOT_PRODUCT_N_DIM],
+  //   constants: { size: DOT_PRODUCT_N_DIM }
+  // });
+
+  // const { average } = await benchmark(FLOPS_COUNT, () => {
+  //   const result = multiplyMatrix(DOT_PRODUCT_SAMPLE_A, DOT_PRODUCT_SAMPLE_B)
+  //   console.log(result)
+  // })
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
