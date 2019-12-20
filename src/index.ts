@@ -38,7 +38,7 @@ const FLOPS_COUNT = 1000
 
 const DOT_PRODUCT_N_DIM = 1000;
 const [DOT_PRODUCT_SAMPLE_A, DOT_PRODUCT_SAMPLE_B] = generateDotProductSamples(DOT_PRODUCT_N_DIM)
-const DOT_PRODUCT_COUNT = 10
+const DOT_PRODUCT_COUNT = 10;
 
 async function benchmarkFLOPSJavaScript(): Promise<void> {
   const { average } = await benchmark(FLOPS_COUNT, (c) => {
@@ -103,7 +103,7 @@ const buttonStartDotProductWebAssemblyDOM = document.getElementById('button-star
 const startBenchmarkIfNeeded = (() => {
   let isBenchmarking = false
 
-  return (benchmark: () => void) => {
+  return (benchmark: (() => void) | (() => Promise<void>)) => {
     if (isBenchmarking) return
     isBenchmarking = true
 
@@ -120,29 +120,24 @@ const startBenchmarkIfNeeded = (() => {
 
       setTimeout(() => {
         isBenchmarking = false
-        loadingDOM.style.visibility = 'hidden'
+        loadingDOM.style.visibility = 'hidden';
+        (buttonStartFLOPSJavaScriptDOM as any).disabled = false;
+        (buttonStartFLOPSGPUDOM as any).disabled = false;
+        (buttonStartFLOPSWebAssemblyDOM as any).disabled = false;
+        (buttonStartDotProductJavaScriptDOM as any).disabled = false;
+        (buttonStartDotProductGPUDOM as any).disabled = false;
+        (buttonStartDotProductWebAssemblyDOM as any).disabled = false
       }, 500);
-
-      (buttonStartFLOPSJavaScriptDOM as any).disabled = false;
-      (buttonStartFLOPSGPUDOM as any).disabled = false;
-      (buttonStartFLOPSWebAssemblyDOM as any).disabled = false;
-      (buttonStartDotProductJavaScriptDOM as any).disabled = false;
-      (buttonStartDotProductGPUDOM as any).disabled = false;
-      (buttonStartDotProductWebAssemblyDOM as any).disabled = false
     }, 500)
   }
 })()
 
 buttonStartFLOPSJavaScriptDOM.addEventListener('click', () => {
-  startBenchmarkIfNeeded(() => {
-    benchmarkFLOPSJavaScript()
-  })
+  startBenchmarkIfNeeded(benchmarkFLOPSJavaScript)
 })
 
 buttonStartFLOPSGPUDOM.addEventListener('click', () => {
-  startBenchmarkIfNeeded(() => {
-    benchmarkFLOPSGPU()
-  })
+  startBenchmarkIfNeeded(benchmarkFLOPSGPU)
 })
 
 buttonStartFLOPSWebAssemblyDOM.addEventListener('click', () => {
@@ -155,15 +150,11 @@ buttonStartFLOPSWebAssemblyDOM.addEventListener('click', () => {
 })
 
 buttonStartDotProductJavaScriptDOM.addEventListener('click', () => {
-  startBenchmarkIfNeeded(() => {
-    benchmarkDotProductJavaScript()
-  })
+  startBenchmarkIfNeeded(benchmarkDotProductJavaScript)
 })
 
 buttonStartDotProductGPUDOM.addEventListener('click', () => {
-  startBenchmarkIfNeeded(() => {
-    benchmarkDotProductGPU()
-  })
+  startBenchmarkIfNeeded(benchmarkDotProductGPU)
 })
 
 buttonStartDotProductWebAssemblyDOM.addEventListener('click', () => {
