@@ -4,8 +4,8 @@ extern crate web_sys;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
-pub fn run(dim: usize, sample_a: &[f32], sample_b: &[f32], debug_result: &mut [f32]) -> Result {
-    let result = benchmark(10, |_| {
+pub fn run(repeat_count: i32, dim: usize, sample_a: &[f32], sample_b: &[f32], debug_result: &mut [f32]) -> Result {
+    let result = benchmark(repeat_count, |_| {
         dot_product(dim, debug_result, sample_a, sample_b);
     });
 
@@ -14,9 +14,39 @@ pub fn run(dim: usize, sample_a: &[f32], sample_b: &[f32], debug_result: &mut [f
     }
 }
 
+#[wasm_bindgen(js_name = runFlops)]
+pub fn run_flops(repeat_count: i32, samples: &[f32]) -> FlopsResult {
+    let n_samples = samples.len();
+    let mut debug_result: f32 = 0.0;
+    let result = benchmark(repeat_count, |i| {
+        // for (let i = 0; i < FLOPS_N_SAMPLE; i++) {
+        //   result += FLOPS_SAMPLES[i]
+        // }
+        let mut sum = 0.0;
+        for i in 0..n_samples {
+            sum += samples[i]
+        }
+        if i == 0 {
+            debug_result = sum;
+        }
+    });
+
+    FlopsResult {
+        average: result.average,
+        debug_result: debug_result
+    }
+}
+
 #[wasm_bindgen]
 pub struct Result {
     pub average: f64
+}
+
+#[wasm_bindgen]
+pub struct FlopsResult {
+    pub average: f64,
+    #[wasm_bindgen(js_name = "debugResult")]
+    pub debug_result: f32
 }
 
 // #[cfg(test)]

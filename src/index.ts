@@ -1,48 +1,11 @@
 import * as tf from '@tensorflow/tfjs'
+import benchmark from './benchmark';
+import dotProductJS from './dot-product';
 
 let wasmBench: typeof import('wasm-bench') | undefined;
 
 async function loadWasmBench() {
   wasmBench = await import('wasm-bench')
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-async function benchmark(
-  n: number,
-  block: ((i: number) => void) | ((i: number) => Promise<void>),
-): Promise<{
-  total: number
-}>;
-async function benchmark<T>(
-  n: number,
-  block: ((i: number, value: T) => void) | ((i: number, value: T) => Promise<void>),
-  pre: () => T
-): Promise<{
-  total: number
-}>;
-async function benchmark<T>(
-  n: number,
-  block: ((i: number, value?: T) => void) | ((i: number, value?: T) => Promise<void>),
-  pre?: () => T
-): Promise<{
-  total: number
-}> {
-  let total = 0;
-  for (let i = 0; i < n; i++) {
-    let value: T | undefined;
-    if (pre) {
-      value = pre()
-    }
-    const startTime = Date.now();
-    await block(i, value)
-    const endTime = Date.now();
-    total += endTime - startTime
-  }
-
-  return {
-    total: total / n
-  }
 }
 
 function generateFlopsSamples(nSample: number): Float32Array {
@@ -67,58 +30,47 @@ function generateDotProductSamples(nDim: number): [number[][], number[][]] { // 
   return [generateSample(), generateSample()]
 }
 
-function dotProductJS(a: Float32Array, b: Float32Array, nDim: number): Float32Array { // C = A . B
-  const c = new Float32Array(nDim**2)
-  for (let k = 0; k < nDim; k++) {
-    for (let i = 0; i < nDim; i++) {
-      for (let j = 0; j < nDim; j++) {
-        c[i * nDim + j] += a[i * nDim + k] * b[k * nDim + j]
-      }
-    }
-  }
-  return c
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const FLOPS_N_SAMPLE = 100000
 const FLOPS_SAMPLES = generateFlopsSamples(FLOPS_N_SAMPLE)
-const FLOPS_COUNT = 10
+const FLOPS_COUNT = 1000
 
 const DOT_PRODUCT_N_DIM = 1000;
 const [DOT_PRODUCT_SAMPLE_A, DOT_PRODUCT_SAMPLE_B] = generateDotProductSamples(DOT_PRODUCT_N_DIM)
 const DOT_PRODUCT_COUNT = 10
 
 async function benchmarkFLOPSJavaScript(): Promise<void> {
-  const { total } = await benchmark(FLOPS_COUNT, () => {
+  const { average } = await benchmark(FLOPS_COUNT, (c) => {
     let result = 0;
     for (let i = 0; i < FLOPS_N_SAMPLE; i++) {
       result += FLOPS_SAMPLES[i]
     }
+    if (c === 0) {
+      console.log('flops js result: ', result)
+    }
   })
 
-  console.log('flops js: ', total)
+  console.log('flops js: ', average)
 }
 
 async function benchmarkFLOPSGPU() {
-  const { total } = await benchmark(FLOPS_COUNT, async (_, value) => {
-    await value.data()
+  const { average } = await benchmark(FLOPS_COUNT, async (_, value) => {
+    const res = await value.data()
+    console.log('flops js result: ', res)
   }, () => {
-    let result = tf.scalar(0);
-    for (let i = 0; i < FLOPS_N_SAMPLE; i++) {
-      result.add(FLOPS_SAMPLES[i])
-    }
+    let result = tf.addN(Array.from(FLOPS_SAMPLES))
     return result
   })
 
-  console.log('flops gpu: ', total)
+  console.log('flops gpu: ', average)
 }
 
 async function benchmarkDotProductJavaScript() {
   const abSampleA = new Float32Array((DOT_PRODUCT_SAMPLE_A as any).flat())
   const abSampleB = new Float32Array((DOT_PRODUCT_SAMPLE_B as any).flat())
 
-  const { total: jsTotal } = await benchmark(DOT_PRODUCT_COUNT, () => {
+  const { average: jsTotal } = await benchmark(DOT_PRODUCT_COUNT, () => {
     dotProductJS(abSampleA, abSampleB, DOT_PRODUCT_N_DIM)
   })
 
@@ -129,7 +81,7 @@ async function benchmarkDotProductGPU() {
   const tfSampleA = tf.tensor2d(DOT_PRODUCT_SAMPLE_A);
   const tfSampleB = tf.tensor2d(DOT_PRODUCT_SAMPLE_B);
 
-  const { total: tfTotal } = await benchmark(DOT_PRODUCT_COUNT, async (_, value) => {
+  const { average: tfTotal } = await benchmark(DOT_PRODUCT_COUNT, async (_, value) => {
     await value.data()
   }, () => {
     return tf.dot(tfSampleA, tfSampleB)
@@ -195,7 +147,10 @@ buttonStartFLOPSGPUDOM.addEventListener('click', () => {
 
 buttonStartFLOPSWebAssemblyDOM.addEventListener('click', () => {
   startBenchmarkIfNeeded(() => {
-    // const result = wasmBench?.run();
+    const result = wasmBench?.runFlops(FLOPS_COUNT, FLOPS_SAMPLES);
+    if (!result) return
+    console.log('ave: ', result.average)
+    console.log('debug: ', result.debug_result)
   })
 })
 
@@ -216,7 +171,7 @@ buttonStartDotProductWebAssemblyDOM.addEventListener('click', () => {
     const abSampleA = new Float32Array((DOT_PRODUCT_SAMPLE_A as any).flat())
     const abSampleB = new Float32Array((DOT_PRODUCT_SAMPLE_B as any).flat())
     const debugResult = new Float32Array((DOT_PRODUCT_SAMPLE_A as any).flat())
-    const result = wasmBench?.run(DOT_PRODUCT_N_DIM, abSampleA, abSampleB, debugResult)
+    const result = wasmBench?.run(DOT_PRODUCT_COUNT, DOT_PRODUCT_N_DIM, abSampleA, abSampleB, debugResult)
     if (!result) return
     console.log('ave: ', result.average)
     console.log('debug: ', debugResult)
