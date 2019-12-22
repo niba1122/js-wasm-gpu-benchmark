@@ -52,12 +52,10 @@ async function benchmarkSummationJavaScript(): Promise<void> {
 }
 
 async function benchmarkSummationGPU() {
-  const { average } = await benchmark(SUMMATION_COUNT, async (_, value) => {
-    const res = await value.data()
+  const { average } = await benchmark(SUMMATION_COUNT, async (_) => {
+    let resultObject = tf.addN(Array.from(SAMMATION_SAMPLES))
+    const res = await resultObject.data()
     console.log('flops js result: ', res)
-  }, () => {
-    let result = tf.addN(Array.from(SAMMATION_SAMPLES))
-    return result
   })
 
   console.log('flops gpu: ', average)
@@ -78,10 +76,9 @@ async function benchmarkDotProductGPU() {
   const tfSampleA = tf.tensor2d(DOT_PRODUCT_SAMPLE_A);
   const tfSampleB = tf.tensor2d(DOT_PRODUCT_SAMPLE_B);
 
-  const { average: tfTotal } = await benchmark(DOT_PRODUCT_COUNT, async (_, value) => {
-    await value.data()
-  }, () => {
-    return tf.dot(tfSampleA, tfSampleB)
+  const { average: tfTotal } = await benchmark(DOT_PRODUCT_COUNT, async (_) => {
+    const resultObject = tf.dot(tfSampleA, tfSampleB)
+    await resultObject.data()
   })
 
   console.log('tf: ', tfTotal)
