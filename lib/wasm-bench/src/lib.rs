@@ -19,13 +19,7 @@ pub fn run_flops(repeat_count: i32, samples: &[f32]) -> FlopsResult {
     let n_samples = samples.len();
     let mut debug_result: f32 = 0.0;
     let result = benchmark(repeat_count, |i| {
-        // for (let i = 0; i < FLOPS_N_SAMPLE; i++) {
-        //   result += FLOPS_SAMPLES[i]
-        // }
-        let mut sum = 0.0;
-        for i in 0..n_samples {
-            sum += samples[i]
-        }
+        let sum = sum(n_samples, samples);
         if i == 0 {
             debug_result = sum;
         }
@@ -86,4 +80,12 @@ fn dot_product(dim: usize, c: &mut [f32], a: &[f32], b: &[f32]) {
             }
         }
     }
+}
+
+fn sum(length: usize, values: &[f32]) -> f32 {
+    let mut sum = 0.0;
+    for i in 0..length {
+        sum += values[i]
+    }
+    return sum
 }
