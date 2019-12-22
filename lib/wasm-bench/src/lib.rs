@@ -20,9 +20,9 @@ pub fn run_flops(repeat_count: i32, samples: &[f32]) -> FlopsResult {
     let mut debug_result: f32 = 0.0;
     let result = benchmark(repeat_count, |i| {
         let sum = sum(n_samples, samples);
-        // if i == 0 {
-        //     debug_result = sum;
-        // }
+        if i == 0 {
+            debug_result = sum;
+        }
     });
 
     FlopsResult {
